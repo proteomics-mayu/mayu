@@ -49,7 +49,7 @@ use Cwd;
 # no output buffering
 $| = 1;
 
-my $version = '1.07';
+my $version = '1.08';
 
 #-------------------------------------------------------------
 # protein size estimation

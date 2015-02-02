@@ -77,7 +77,8 @@ sub protein_size_analysis {
 		$gene_group_regex,
 		$general_min_pep_length,
 		$special_zero_bin,
-		$equinr_bins
+		$equinr_bins,
+		$filter_ids
 	  )
 	  = @_;
 
@@ -96,6 +97,12 @@ sub protein_size_analysis {
 	#
 	# if yes, delete all the decoy entries in the hash $rh_id_seq
 	# because the calculations do not have to be done twice
+	# 
+	# if the decoys are perfectly mirrored:
+	# the returned $rh_id_seq corresponds to target ids and sequences only!
+	#
+	# if the decoys are not perfectly mirrored:
+	# the returned $rh_id_seq corresponds to both, target and decoy ids and sequences
 	if ($mirror_decoy_ids_from_target_ids) {
 		$self->v_print("checking decoy ids for mirror target ids...");
 		( $mirror_decoy_ids_from_target_ids, $rh_id_seq ) =
@@ -133,6 +140,18 @@ sub protein_size_analysis {
 		$mirror_decoy_ids_from_target_ids, $general_min_pep_length
 	);
 
+	# fixed 20150128 because of Lorenz Blum
+	# moved up here in front of the protein binning
+	#
+	# copy the target entries to decoy entries
+	if ($mirror_decoy_ids_from_target_ids) {
+		$self->v_print("copying target entries to decoy entries...\n");
+		foreach ( keys %$rh_id_seq ) {
+			my $decoy_id = $decoy_id_prefix . $_;
+			$rh_ra_id_protprop->{$decoy_id} = $rh_ra_id_protprop->{$_};
+		}
+	}
+
 	# $ra_bin_nrprot
 	# index: bin number
 	# value: number of total target proteins in that bin
@@ -149,19 +168,12 @@ sub protein_size_analysis {
 		$equinr_bins );
 	my $ra_breaks = $bins_ob->get_breaks();
 
-	# copy the target entries to decoy entries
-	if ($mirror_decoy_ids_from_target_ids) {
-		$self->v_print("copying target entries to decoy entries...\n");
-		foreach ( keys %$rh_id_seq ) {
-			my $decoy_id = $decoy_id_prefix . $_;
-			$rh_ra_id_protprop->{$decoy_id} = $rh_ra_id_protprop->{$_};
-		}
-	}
+
 
 	# create a BinnedEntity object for proteins
 	my $binned_prot_entity =
 	  $self->get_binned_prot_entity( $rh_ra_id_protprop, $ra_bin_nrprot,
-		$bins_ob );
+		$bins_ob, $filter_ids );
 
 	# create a BinnedEntity object for peptides with one bin
 	my $binned_pep_entity =
@@ -178,9 +190,11 @@ sub protein_size_analysis {
 # Args      :
 sub get_binned_prot_entity {
 	my $self = shift;
-	my ( $rh_ra_id_protprop, $ra_bin_nrprot, $bins_ob ) = @_;
-
-	my $binned_entity      = BinnedEntity->new();
+	my ( $rh_ra_id_protprop, $ra_bin_nrprot, $bins_ob, $filter_ids ) = @_;
+                                                                      
+	# $filter_ids = 0 means that for proteins from the PSM file which     
+	# are not found in the fasta, Mayu will use an average protein length 
+	my $binned_entity      = BinnedEntity->new( $filter_ids );            
 	my %index_feature_name = (
 		'aa'             => 0,
 		'id_seq_corr_aa' => 1,
@@ -277,7 +291,13 @@ sub bin_proteins {
 		my $corr_ntp = $rh_ra_id_protprop->{$id}[$corr_ntp_index];
 		my $bin_nr   = $bins_ob->get_bin_nr($corr_ntp);
 		push @{ $rh_ra_id_protprop->{$id} }, $bin_nr;
-		$ra_bin_nrprot->[$bin_nr]++;
+		# only count the non decoy proteins!
+		# fixed 20150128 because of Lorenz Blum
+		if ( $id !~ /^$decoy_id_prefix/ ) {
+			$ra_bin_nrprot->[$bin_nr]++;
+		}
+		# this was the old code
+		#$ra_bin_nrprot->[$bin_nr]++;
 	}
 
 	return ( $ra_bin_nrprot, $rh_ra_id_protprop, $bins_ob );
