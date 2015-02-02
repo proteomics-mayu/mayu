@@ -124,7 +124,7 @@ sub new {
 	# 7  target PSM
 	# 8  decoy PSM
 	$self->{roc_header} = [
-		'PPs',     'mFDR',  'FP',    'TP',
+		'IP/PPs',     'mFDR',  'FP',    'TP',
 		'TD_mFDR', 'TD_FP', 'TD_TP', 'target_PSM',
 		'decoy_PSM'
 	];
@@ -536,6 +536,28 @@ sub get_decoy_psm_by_fdr {
 	}
 
 	return \@decoy_psm;
+}
+
+# Object Method
+# Title	    :  get_ds_by_fdr()
+# Usage     :
+# Function	:
+# Returns   :
+# Args      :
+sub get_ds_by_fdr {   
+    my $self = shift();
+	my ($fdr) = @_;
+
+	my $ra_ra_target_psm = $self->get_target_psm_by_fdr($fdr);
+    my $smallest = 1;
+    foreach my $ra_psm ( @$ra_ra_target_psm )
+	{
+		if ( defined( $ra_psm->[4] ) && $ra_psm->[4] < $smallest ) {
+            $smallest = $ra_psm->[4];
+		}
+	}
+
+	return $smallest;
 }
 
 # Object Method

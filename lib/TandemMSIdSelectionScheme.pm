@@ -95,6 +95,7 @@ sub all_id_mFDR_range {
 		print "  step $step\t$psm_fdr mFDR" if $self->{s};
 
 		my $ra_ra_psm = $psm_set->get_psm_by_fdr($psm_fdr);
+        my $ds_for_psm = $psm_set->get_ds_by_fdr($psm_fdr);
 
 		# feed this set of selected identifications into
 		# the TandemMSIdSet
@@ -103,7 +104,8 @@ sub all_id_mFDR_range {
 		my $rh_attributes = {
 			'nr_files' => $nr_files,
 			'nr_runs'  => $nr_runs,
-			'mFDR'     => $psm_fdr
+			'mFDR'     => $psm_fdr,
+            'IP/PPs'    => $ds_for_psm
 		};
 		$manager->set_psm_set( $ra_ra_psm, $rh_attributes );
 	}

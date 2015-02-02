@@ -128,6 +128,8 @@ sub parse {
 	my $status        = $self->{s};
 	my $status_prefix = $self->{s_prefix};
 	$| = 1 if $status;
+	
+	my $foundip = 0;
 
 	if ( -e $self->{input_pepxml} ) {
 
@@ -168,6 +170,19 @@ sub parse {
 					$search_hit =~
 					  /<peptideprophet_result probability="([^"]+)"/;
 					$pps = $1;
+				}
+				if ( $search_hit =~
+					/<interprophet_result probability="([^"]+)"/ )
+				{
+					if(!$foundip) 
+                    { 
+                        print "  Found IprophetProbability. Using this instead of PeptideProphetProbability.\n";
+                        print "  Caveat: Do not mix iprophet and peptideprophet files, there is no check!\n";
+                        $foundip = 1; 
+                    }
+					$search_hit =~
+					/<interprophet_result probability="([^"]+)"/;
+                    $pps = $1;
 				}
 				my @mod = split( "<mod_aminoacid_mass ", $search_hit );
 				foreach my $mod (@mod) {

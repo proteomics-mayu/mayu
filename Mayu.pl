@@ -4,6 +4,7 @@ use warnings;
 
 use Getopt::Long;
 use File::Basename;
+use FindBin;
 use Cwd;
 
 ##################################################################
@@ -29,14 +30,14 @@ use Cwd;
 #	  Institute of Molecular Biology
 #	  Winterthurerstrasse 190
 #	  University of Zuerich - Irchel
-#	  CH-8057 Zürich
+#	  CH-8057 ZÃ¼rich
 #	+++++++++++++++++++++++++++++++++++++++++
 #	Located at:
 #	  Institute for Molecular Systems Biology
 #	  Aebersold Laboratory
 #	  Wolfgang-Pauli-Str. 16
-#	  ETH Hönggerberg, HPT C 75
-#	  CH-8093 Zürich
+#	  ETH HÃ¶nggerberg, HPT C 75
+#	  CH-8093 ZÃ¼rich
 #	  Tel: +41 44 633 39 45
 #
 ##################################################################
@@ -48,7 +49,7 @@ use Cwd;
 # no output buffering
 $| = 1;
 
-my $version = '1.06';
+my $version = '1.07';
 
 #-------------------------------------------------------------
 # protein size estimation
@@ -262,6 +263,7 @@ sub main {
 	my $wd = getcwd();
 
 	# wd needs to be the Mayu directory for proper loading
+	# TPP installs in 2 different locations depending on OS
 	use lib "lib";
 
 	# load modules
@@ -752,7 +754,7 @@ sub get_ids_filtering {
 sub print_prot_size_bin_file {
 	my ( $p_manager, $out_base, $tools ) = @_;
 
-	my $csv_sep        = "\t";
+	my $csv_sep        = ",";
 	my $prot_size_csv  = $out_base . '.csv';
 	my $prot_size_txt  = $out_base . '.txt';
 
@@ -783,7 +785,7 @@ sub print_prot_size_bin_file {
 sub print_main_file {
 	my ( $p_manager, $out_base, $tools ) = @_;
 
-	my $csv_sep  = "\t";
+	my $csv_sep  = ",";
 	my $fdr_csv  = $out_base . '.csv';
 	my $fdr_txt  = $out_base . '.txt';
 
@@ -1219,6 +1221,7 @@ sub preprocess_psm_set {
 	print "  non FDR filtered decoy:  $nr_all_dpsm PSM,\t$nr_all_dpep "
 	  . "peptides,\t$nr_all_dpr proteins\n"
 	  if $v;
+	print "\n" if $v;
 
 	# give overview of size of the parsed data
 	my ( $nr_tpsm, $nr_dpsm, $nr_tpep, $nr_dpep, $nr_tpr, $nr_dpr ) =

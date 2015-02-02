@@ -252,7 +252,7 @@ sub get_table {
 	if ($header) {
 		unshift @$ra_ra_table, $self->get_header();
 	}
-	
+    
 	return $ra_ra_table;
 }
 
