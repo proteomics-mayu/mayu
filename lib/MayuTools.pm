@@ -1,5 +1,6 @@
 package MayuTools;
 use strict;
+use File::Spec::Functions;
 
 ##################################################################
 #
@@ -167,7 +168,7 @@ sub get_files {
 		closedir(IN) or warn $!;
 		if ( defined($fs) ) {
 			foreach my $curr_file (@curr_files) {
-				my $conc = $in . $curr_file;
+				my $conc = catfile(curdir(),$in, $curr_file);
 				if ( $curr_file =~ /\.[^\.]+$/ && -f $conc ) {
 					$curr_file =~ /(\.[^\.]+)$/;
 					my $curr_fs = $1;
@@ -180,7 +181,7 @@ sub get_files {
 		}
 		else {
 			foreach (@curr_files) {
-				my $conc = $in . $_;
+				my $conc = catfile(curdir(),$in, $_);
 				if ( -f $conc ) {    # if it's not . or ..
 					push @return_files, $conc;
 				}
